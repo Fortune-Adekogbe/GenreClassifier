@@ -1,2 +1,2 @@
-libsndfile1
-ffmpeg
+sudo libsndfile1
+sudo ffmpeg
