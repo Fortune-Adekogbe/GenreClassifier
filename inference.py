@@ -11,7 +11,6 @@ def extract_mfcc_batch(file_path, n_mfcc=13, n_fft=1024, hop_length=512, length_
     """
     mfcc_batch = []
     num_samples_per_segment = 220500 #length_segment * SAMPLE_RATE
-    expected_num_mfcc_vectors_per_segment = math.ceil(num_samples_per_segment / hop_length)
    
     signal, sr = librosa.load(file_path, sr=SAMPLE_RATE)
 
@@ -22,7 +21,7 @@ def extract_mfcc_batch(file_path, n_mfcc=13, n_fft=1024, hop_length=512, length_
         start_sample = num_samples_per_segment * s
         finish_sample = start_sample + num_samples_per_segment
         try:
-            mfcc = librosa.feature.mfcc(signal[start_sample:finish_sample],
+            mfcc = librosa.feature.mfcc(y=signal[start_sample:finish_sample],
                                     sr=SAMPLE_RATE,
                                     n_fft=n_fft,
                                     n_mfcc=n_mfcc,
@@ -33,7 +32,9 @@ def extract_mfcc_batch(file_path, n_mfcc=13, n_fft=1024, hop_length=512, length_
             # store mfcc for segment if it has the expected length
             if len(mfcc) == 431:
                 mfcc_batch.append(mfcc.tolist())
-        except:
+
+        except Exception as e:
+            print(e)
             continue
     return mfcc_batch
 
