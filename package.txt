@@ -1,2 +1,6 @@
 libsndfile1
 ffmpeg
+libfluidsynth1 
+build-essential 
+libasound2-dev 
+libjack-dev
