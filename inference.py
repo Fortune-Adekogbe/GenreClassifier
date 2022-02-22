@@ -1,44 +1,17 @@
-import math, librosa
 import numpy as np
+import requests
 
 from tensorflow import keras
 
-SAMPLE_RATE = 22050
-def extract_mfcc_batch(file_path, n_mfcc=13, n_fft=1024, hop_length=512, length_segment=10):
-    """
-    Extract and return an mfcc batch
-    MFCC - Mel Frequency Cepstrum Coefficients
-    """
-    mfcc_batch = []
-    num_samples_per_segment = 220500 #length_segment * SAMPLE_RATE
-   
-    sr, signal = file_path#librosa.load(file_path, sr=SAMPLE_RATE)
-    signal = signal.astype(np.float64)
-
-    duration = librosa.get_duration(y=signal, sr=sr) #30 seconds
-    print(duration)
-    num_segments = int(duration/length_segment) #3
-    # process segments, extracting mfccs and storing data
-    for s in range(num_segments+1):
-        start_sample = num_samples_per_segment * s
-        finish_sample = start_sample + num_samples_per_segment
-        try:
-            mfcc = librosa.feature.mfcc(y=signal[start_sample:finish_sample],
-                                    sr=SAMPLE_RATE,
-                                    n_fft=n_fft,
-                                    n_mfcc=n_mfcc,
-                                    hop_length=hop_length
-                                    )
-            #(13, 431)
-            mfcc = mfcc.T # A transpose
-            # store mfcc for segment if it has the expected length
-            if len(mfcc) == 431:
-                mfcc_batch.append(mfcc.tolist())
-
-        except Exception as e:
-            print(e)
-            continue
-    return mfcc_batch
+def get_mfccs(filename):
+    # Load the file to send
+    files = {'audio': open(filename, 'rb')}
+    # Send the HTTP request and get the reply
+    reply = requests.post("https://librosa-utils.herokuapp.com/mfcc_batch", files=files)
+    # Extract the text from the reply and decode the JSON into a list
+    pitch_track = reply.json()
+    print(np.shape(pitch_track['mfccs']))
+    return np.array(pitch_track['mfccs'])
 
 def inference(filename, model_path='gtzan10_lstm_0.7179_l_1.12.h5'):
     model = keras.models.load_model(model_path)
@@ -52,7 +25,7 @@ def inference(filename, model_path='gtzan10_lstm_0.7179_l_1.12.h5'):
                 'pop',
                 'reggae',
                 'rock']
-    mfcc = extract_mfcc_batch(filename)
+    mfcc = get_mfccs(filename)
     pred = model.predict(mfcc)
     genre = [mapping[i] for i in np.argmax(pred, axis=1)]
 
