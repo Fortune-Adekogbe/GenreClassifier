@@ -1,8 +1,8 @@
 import subprocess, platform
 
 if platform.system() == 'Linux':
-    subprocess.call(['apt-get install', 'libsndfile1'])
-    subprocess.call(['apt-get install', 'ffmpeg'])
+    subprocess.run(['apt-get', 'install', 'libsndfile1'])
+    subprocess.run(['apt-get', 'install', 'ffmpeg'])
 
 import gradio as gr
 from inference import *
