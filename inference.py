@@ -12,9 +12,11 @@ def extract_mfcc_batch(file_path, n_mfcc=13, n_fft=1024, hop_length=512, length_
     mfcc_batch = []
     num_samples_per_segment = 220500 #length_segment * SAMPLE_RATE
    
-    signal, sr = librosa.load(file_path, sr=SAMPLE_RATE)
+    sr, signal = file_path#librosa.load(file_path, sr=SAMPLE_RATE)
+    signal = signal.astype(np.float64)
 
     duration = librosa.get_duration(y=signal, sr=sr) #30 seconds
+    print(duration)
     num_segments = int(duration/length_segment) #3
     # process segments, extracting mfccs and storing data
     for s in range(num_segments+1):
